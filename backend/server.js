@@ -2,12 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const crypto = require("crypto");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const DATA_FILE = "device.json";
+// Absolute path (important for Render)
+const DATA_FILE = path.join(__dirname, "device.json");
 
 // Create file if missing
 if (!fs.existsSync(DATA_FILE)) {
@@ -26,11 +28,10 @@ const USERS = [
   { username: "Mr1", password: "7777" },
   { username: "Mr2", password: "8888" },
   { username: "Mr3", password: "9999" },
-  { username: "Mr4", password: "1111" }
+
 ];
 
-
-// Initialize users in DB
+// Initialize DB with users
 function initUsers() {
     const db = loadDB();
     USERS.forEach(u => {
@@ -49,6 +50,7 @@ function initUsers() {
 }
 initUsers();
 
+
 /* =============== LOGIN =============== */
 app.post("/login", (req, res) => {
     const { username, password, deviceId } = req.body;
@@ -62,7 +64,7 @@ app.post("/login", (req, res) => {
     if (user.password !== password)
         return res.json({ success: false, message: "Wrong password" });
 
-    // FIRST TIME login
+    // FIRST TIME
     if (!user.deviceId) {
         user.deviceId = deviceId;
         user.sessionToken = crypto.randomUUID();
@@ -76,7 +78,7 @@ app.post("/login", (req, res) => {
         });
     }
 
-    // SAME DEVICE → auto login
+    // SAME DEVICE
     if (user.deviceId === deviceId) {
         return res.json({
             success: true,
@@ -85,7 +87,7 @@ app.post("/login", (req, res) => {
         });
     }
 
-    // DIFFERENT DEVICE → request approval
+    // DIFFERENT DEVICE → Need approval
     user.status = "pending";
     user.waitingDevice = deviceId;
     user.requestId = crypto.randomUUID();
@@ -126,21 +128,14 @@ app.post("/approve", (req, res) => {
     if (!user || user.requestId !== requestId)
         return res.json({ success: false });
 
-    // Switch device
     user.deviceId = user.waitingDevice;
     user.sessionToken = crypto.randomUUID();
     user.status = "active";
-
     user.waitingDevice = null;
     user.requestId = null;
-
     saveDB(db);
 
-    return res.json({
-        success: true,
-        token: user.sessionToken,
-        url: "https://mdquiz02.blogspot.com/"
-    });
+    return res.json({ success: true, token: user.sessionToken });
 });
 
 
@@ -153,7 +148,6 @@ app.post("/decline", (req, res) => {
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;
-
     saveDB(db);
 
     return res.json({ success: true });
@@ -172,13 +166,14 @@ app.post("/logout", (req, res) => {
             user.sessionToken = null;
             user.status = "logged_out";
             saveDB(db);
-
             return res.json({ success: true });
         }
     }
-
     res.json({ success: false });
 });
 
 
-app.listen(3000, () => console.log("Backend running on port 3000"));
+// Render will auto detect port
+app.listen(process.env.PORT || 3000, () =>
+    console.log("Backend running...")
+);

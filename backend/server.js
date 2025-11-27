@@ -250,3 +250,42 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
+
+/* =============== DECLINE REQUEST =============== */
+app.post("/decline", (req, res) => {
+    const { username } = req.body;
+    const db = loadDB();
+    const user = db.users[username];
+
+    if (!user) return res.json({ success: false });
+
+    // store decline message for new device
+    user.declineMessage = "Sorry! Admin did not approve your login.";
+
+    user.status = "active";
+    user.waitingDevice = null;
+    user.requestId = null;
+
+    saveDB(db);
+
+    return res.json({ success: true });
+});
+
+/* =============== CHECK DECLINE MESSAGE =============== */
+app.post("/check-decline", (req, res) => {
+    const { username } = req.body;
+    const db = loadDB();
+    const user = db.users[username];
+
+    if (!user) return res.json({ hasDecline: false });
+
+    if (user.declineMessage) {
+        const msg = user.declineMessage;
+        user.declineMessage = null; // clear after sent
+        saveDB(db);
+
+        return res.json({ hasDecline: true, message: msg });
+    }
+
+    return res.json({ hasDecline: false });
+});

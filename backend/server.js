@@ -10,8 +10,9 @@ app.use(express.json());
 const DATA_FILE = path.join(__dirname, 'device.json');
 
 const USERS = [
-  { username: 'user1', password: 'pass1' },
-  { username: 'user2', password: 'pass2' }
+  { username: 'doctor', password: 'med123' },
+  { username: 'nurse', password: 'health2024' },
+  { username: 'admin', password: '123456' }
 ];
 
 function readData(){

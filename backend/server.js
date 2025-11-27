@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -8,172 +9,244 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Absolute path (important for Render)
+// <-- Ensure this path points to the same folder as server.js -->
 const DATA_FILE = path.join(__dirname, "device.json");
 
-// Create file if missing
-if (!fs.existsSync(DATA_FILE)) {
+// create device.json if missing (safe)
+function ensureDataFile() {
+  if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify({ users: {} }, null, 2));
+  }
 }
+ensureDataFile();
 
 function loadDB() {
-    return JSON.parse(fs.readFileSync(DATA_FILE));
+  ensureDataFile();
+  const raw = fs.readFileSync(DATA_FILE, "utf8");
+  return JSON.parse(raw);
 }
-
 function saveDB(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
+// === Users list (edit / add users here) ===
 const USERS = [
   { username: "Mr1", password: "7777" },
   { username: "Mr2", password: "8888" },
-  { username: "Mr3", password: "9999" }
-
+  { username: "Mr3", password: "9999" },
+  { username: "Mr4", password: "1111" }
 ];
 
-// Initialize DB with users
+// Initialize users in DB (only if not present)
 function initUsers() {
-    const db = loadDB();
-    USERS.forEach(u => {
-        if (!db.users[u.username]) {
-            db.users[u.username] = {
-                password: u.password,
-                deviceId: null,
-                sessionToken: null,
-                status: "logged_out",
-                waitingDevice: null,
-                requestId: null
-            };
-        }
-    });
-    saveDB(db);
+  const db = loadDB();
+  if (!db.users) db.users = {};
+  USERS.forEach(u => {
+    if (!u || !u.username) return; // safety
+    if (!db.users[u.username]) {
+      db.users[u.username] = {
+        password: u.password,
+        deviceId: null,
+        sessionToken: null,
+        status: "logged_out", // "logged_out" | "active" | "pending"
+        waitingDevice: null,
+        requestId: null
+      };
+    }
+  });
+  saveDB(db);
 }
 initUsers();
 
+/* =================== HELPERS =================== */
+function genToken() {
+  return crypto.randomUUID();
+}
+function safeJson(res, obj) {
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify(obj));
+}
 
-/* =============== LOGIN =============== */
+/* =================== ROUTES =================== */
+
+/**
+ * POST /login
+ * body: { username, password, deviceId }
+ * responses:
+ *  - { success: true, token, url }
+ *  - { success: false, message }
+ *  - { success: false, requiresApproval: true, requestId, message }
+ */
 app.post("/login", (req, res) => {
-    const { username, password, deviceId } = req.body;
+  try {
+    const { username, password, deviceId } = req.body || {};
+    if (!username || !password || !deviceId) {
+      return safeJson(res, { success: false, message: "Missing username/password/deviceId" });
+    }
+
     const db = loadDB();
-
-    if (!db.users[username])
-        return res.json({ success: false, message: "Invalid username" });
-
     const user = db.users[username];
+    if (!user) return safeJson(res, { success: false, message: "Invalid username" });
+    if (user.password !== password) return safeJson(res, { success: false, message: "Wrong password" });
 
-    if (user.password !== password)
-        return res.json({ success: false, message: "Wrong password" });
-
-    // FIRST TIME
+    // first time (no device)
     if (!user.deviceId) {
-        user.deviceId = deviceId;
-        user.sessionToken = crypto.randomUUID();
-        user.status = "active";
-        saveDB(db);
-
-        return res.json({
-            success: true,
-            token: user.sessionToken,
-            url: "https://mdquiz02.blogspot.com/"
-        });
+      user.deviceId = deviceId;
+      user.sessionToken = genToken();
+      user.status = "active";
+      saveDB(db);
+      return safeJson(res, { success: true, token: user.sessionToken, url: "https://mdquiz02.blogspot.com/" });
     }
 
-    // SAME DEVICE
+    // same device -> accept
     if (user.deviceId === deviceId) {
-        return res.json({
-            success: true,
-            token: user.sessionToken,
-            url: "https://mdquiz02.blogspot.com/"
-        });
+      // ensure token exists
+      if (!user.sessionToken) user.sessionToken = genToken();
+      saveDB(db);
+      return safeJson(res, { success: true, token: user.sessionToken, url: "https://mdquiz02.blogspot.com/" });
     }
 
-    // DIFFERENT DEVICE → Need approval
+    // different device -> create approval request
     user.status = "pending";
     user.waitingDevice = deviceId;
-    user.requestId = crypto.randomUUID();
+    user.requestId = genToken();
     saveDB(db);
 
-    return res.json({
-        success: false,
-        requiresApproval: true,
-        requestId: user.requestId,
-        message: "Someone is trying to login to your account."
+    return safeJson(res, {
+      success: false,
+      requiresApproval: true,
+      requestId: user.requestId,
+      message: "Someone is trying to login to your account."
     });
+  } catch (err) {
+    console.error("LOGIN ERR:", err);
+    return safeJson(res, { success: false, message: "Server error" });
+  }
 });
 
-
-/* =============== FIRST DEVICE CHECK FOR REQUEST =============== */
+/**
+ * POST /check-requests
+ * body: { username }
+ * returns { hasRequest: true/false, requestId? }
+ */
 app.post("/check-requests", (req, res) => {
-    const { username } = req.body;
+  try {
+    const { username } = req.body || {};
+    if (!username) return safeJson(res, { hasRequest: false });
     const db = loadDB();
     const user = db.users[username];
-
+    if (!user) return safeJson(res, { hasRequest: false });
     if (user.status === "pending") {
-        return res.json({
-            hasRequest: true,
-            requestId: user.requestId
-        });
+      return safeJson(res, { hasRequest: true, requestId: user.requestId });
     }
-
-    return res.json({ hasRequest: false });
+    return safeJson(res, { hasRequest: false });
+  } catch (err) {
+    console.error("CHECK-REQ ERR:", err);
+    return safeJson(res, { hasRequest: false });
+  }
 });
 
-
-/* =============== APPROVE NEW DEVICE =============== */
+/**
+ * POST /approve
+ * body: { username, requestId }
+ * approve waiting device -> switch session to waitingDevice
+ */
 app.post("/approve", (req, res) => {
-    const { username, requestId } = req.body;
+  try {
+    const { username, requestId } = req.body || {};
+    if (!username || !requestId) return safeJson(res, { success: false, message: "Missing fields" });
     const db = loadDB();
     const user = db.users[username];
+    if (!user) return safeJson(res, { success: false, message: "Invalid user" });
+    if (user.requestId !== requestId) return safeJson(res, { success: false, message: "Request mismatch" });
 
-    if (!user || user.requestId !== requestId)
-        return res.json({ success: false });
-
+    // switch to waiting device (auto-logout previous)
     user.deviceId = user.waitingDevice;
-    user.sessionToken = crypto.randomUUID();
+    user.sessionToken = genToken();
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;
     saveDB(db);
 
-    return res.json({ success: true, token: user.sessionToken });
+    return safeJson(res, { success: true, token: user.sessionToken, message: "Approved" });
+  } catch (err) {
+    console.error("APPROVE ERR:", err);
+    return safeJson(res, { success: false, message: "Server error" });
+  }
 });
 
-
-/* =============== DECLINE REQUEST =============== */
+/**
+ * POST /decline
+ * body: { username }
+ */
 app.post("/decline", (req, res) => {
-    const { username } = req.body;
+  try {
+    const { username } = req.body || {};
+    if (!username) return safeJson(res, { success: false });
     const db = loadDB();
     const user = db.users[username];
-
+    if (!user) return safeJson(res, { success: false });
+    // cancel pending
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;
     saveDB(db);
-
-    return res.json({ success: true });
+    return safeJson(res, { success: true, message: "Declined" });
+  } catch (err) {
+    console.error("DECLINE ERR:", err);
+    return safeJson(res, { success: false });
+  }
 });
 
-
-/* =============== LOGOUT =============== */
+/**
+ * POST /logout
+ * body: { token }
+ */
 app.post("/logout", (req, res) => {
-    const { token } = req.body;
-    const db = loadDB();
+  try {
+    const { token } = req.body || {};
+    if (!token) return safeJson(res, { success: false, message: "Missing token" });
 
-    for (let username in db.users) {
-        const user = db.users[username];
-        if (user.sessionToken === token) {
-            user.deviceId = null;
-            user.sessionToken = null;
-            user.status = "logged_out";
-            saveDB(db);
-            return res.json({ success: true });
-        }
+    const db = loadDB();
+    for (const uname of Object.keys(db.users)) {
+      const user = db.users[uname];
+      if (user.sessionToken === token) {
+        user.deviceId = null;
+        user.sessionToken = null;
+        user.status = "logged_out";
+        saveDB(db);
+        return safeJson(res, { success: true });
+      }
     }
-    res.json({ success: false });
+    return safeJson(res, { success: false, message: "Token not found" });
+  } catch (err) {
+    console.error("LOGOUT ERR:", err);
+    return safeJson(res, { success: false });
+  }
 });
 
+/* ===== Optional debug endpoints (safe to remove in production) ===== */
 
-// Render will auto detect port
-app.listen(process.env.PORT || 3000, () =>
-    console.log("Backend running...")
-);
+/**
+ * GET /_status
+ * returns simple server status
+ */
+app.get("/_status", (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+/**
+ * GET /_users
+ * returns users DB (for debug only)
+ */
+app.get("/_users", (req, res) => {
+  const db = loadDB();
+  // don't expose passwords in production; here for debug only
+  res.json(db.users);
+});
+
+/* =================== START =================== */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});

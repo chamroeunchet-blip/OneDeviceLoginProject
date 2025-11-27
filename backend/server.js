@@ -25,7 +25,7 @@ function saveDB(data) {
 const USERS = [
   { username: "Mr1", password: "7777" },
   { username: "Mr2", password: "8888" },
-  { username: "Mr3", password: "9999" }
+  { username: "Mr3", password: "9999" },
   { username: "Mr4", password: "1111" }
 ];
 
@@ -47,7 +47,6 @@ function initUsers() {
     saveDB(db);
 }
 initUsers();
-
 
 /* =============== LOGIN =============== */
 app.post("/login", (req, res) => {

@@ -29,6 +29,7 @@ const USERS = [
   { username: "Mr4", password: "1111" }
 ];
 
+
 // Initialize users in DB
 function initUsers() {
     const db = loadDB();

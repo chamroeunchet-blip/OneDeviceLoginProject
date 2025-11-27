@@ -6,65 +6,78 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const DATA_FILE = __dirname + "/device.json";
+const FILE = __dirname + "/device.json";
 
-function readData() {
+function readDB() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  } catch (e) {
-    return { activeDevice: null, username: null };
+    return JSON.parse(fs.readFileSync(FILE, "utf8"));
+  } catch {
+    return { activeDevice: null, activeUser: null };
   }
 }
 
-function writeData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+function writeDB(data) {
+  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
-// ---------------- LOGIN ----------------
+const USERS = [
+  { username: "Mr1", password: "7777" },
+  { username: "Mr2", password: "8888" },
+  { username: "Mr3", password: "9999" }
+];
+
+// ================= LOGIN ==================
 app.post("/login", (req, res) => {
   const { username, password, deviceId } = req.body;
 
-  // USERS LIST
-  const USERS = [
-    { username: "doctor", password: "med123" },
-    { username: "nurse", password: "123456" },
-    { username: "admin", password: "admin123" }
-  ];
+  const db = readDB();
 
+  // Check username & password
   const user = USERS.find(
     (u) => u.username === username && u.password === password
   );
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+  if (!user) return res.status(401).json({ message: "Invalid Login" });
 
-  const data = readData();
-
-  // If SAME device logs back in → allow instantly
-  if (data.activeDevice === deviceId) {
-    return res.json({ message: "Login OK (same device)" });
+  // If same device logs again → allow
+  if (db.activeUser === username && db.activeDevice === deviceId) {
+    return res.json({ message: "Login successful (same device)" });
   }
 
-  // If another device logged in → deny
-  if (data.activeDevice && data.activeDevice !== deviceId) {
+  // If this user is logged in from another device → BLOCK
+  if (db.activeUser === username && db.activeDevice !== deviceId) {
     return res.status(403).json({
       message:
-        "Another device is currently logged in. Please logout from that device first."
+        "This user is already logged in on another device. Please logout from that device first."
     });
   }
 
   // Allow login
-  data.activeDevice = deviceId;
-  data.username = username;
-  writeData(data);
+  db.activeUser = username;
+  db.activeDevice = deviceId;
+  writeDB(db);
 
   return res.json({ message: "Login successful" });
 });
 
-// ---------------- LOGOUT ----------------
+// ================= LOGOUT ==================
 app.post("/logout", (req, res) => {
   const { deviceId } = req.body;
 
-  const data = readData();
+  const db = readDB();
 
-  // Only reset if THAT device was logged in
-  if (data.activeDevice === deviceId) {
-    data.act
+  // Only logout if same device
+  if (db.activeDevice === deviceId) {
+    db.activeUser = null;
+    db.activeDevice = null;
+    writeDB(db);
+  }
+
+  res.json({ message: "Logged out" });
+});
+
+// ================= STATUS ==================
+app.get("/status", (req, res) => {
+  res.json(readDB());
+});
+
+app.listen(3000, () => console.log("Server running"));

@@ -26,8 +26,8 @@ function saveDB(data) {
 const USERS = [
  { username: "Yuos_chamroeun", password: "chamroeun@2025" },
   { username: "Soma", password: "soma@2025" },
-  { username: "Mr3", password: "9999" },
-  { username: "Mr4", password: "1111" }
+  { username: "Sokthida", password: "sokthida@2025" },
+  { username: "Vutha", password: "vutha@2055" }
 ];
 
 // Init Users

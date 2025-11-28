@@ -25,7 +25,7 @@ function saveDB(data) {
 // === Users Config ===
 const USERS = [
   { username: "Yuos_chamroeun", password: "chamroeun@2025" },
-  { username: "Mr2", password: "8888" },
+  { username: "Soma", password: "soma@2025" },
   { username: "Mr3", password: "9999" },
   { username: "Mr4", password: "1111" }
 ];

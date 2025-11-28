@@ -24,7 +24,7 @@ function saveDB(data) {
 
 // === Users Config ===
 const USERS = [
-  { username: "Yuos_chamroeun", password: "chamroeun@2025" },
+ { username: "Yuos_chamroeun", password: "chamroeun@2025" },
   { username: "Soma", password: "soma@2025" },
   { username: "Mr3", password: "9999" },
   { username: "Mr4", password: "1111" }
@@ -43,11 +43,14 @@ const USERS = [
         status: "logged_out",
         waitingDevice: null,
         requestId: null,
-        declineMessage: null // Added field for decline message
+        declineMessage: null,
+        lastActive: 0 // Added to track inactivity
       };
     } else {
         // Ensure password is up to date if changed in config
         db.users[u.username].password = u.password;
+        // Ensure lastActive exists
+        if (!db.users[u.username].lastActive) db.users[u.username].lastActive = 0;
     }
   });
   saveDB(db);
@@ -68,20 +71,18 @@ app.post("/login", (req, res) => {
   if (!user) return safeJson(res, { success: false, message: "Invalid username" });
   if (user.password !== password) return safeJson(res, { success: false, message: "Wrong password" });
 
-  // CHECK DECLINE: If a decline message exists, return it to the polling device
+  // CHECK DECLINE
   if (user.declineMessage) {
       const msg = user.declineMessage;
-      // Clear it after sending so it doesn't block forever
       user.declineMessage = null; 
       saveDB(db);
-      return safeJson(res, { 
-          success: false, 
-          isDeclined: true, 
-          message: msg 
-      });
+      return safeJson(res, { success: false, isDeclined: true, message: msg });
   }
 
-  // 1. First time login
+  // Update Activity on Login
+  user.lastActive = Date.now();
+
+  // 1. First time login OR deviceId was cleared (Logout)
   if (!user.deviceId) {
     user.deviceId = deviceId;
     user.sessionToken = genToken();
@@ -93,7 +94,7 @@ app.post("/login", (req, res) => {
   // 2. Same device login
   if (user.deviceId === deviceId) {
     if (!user.sessionToken) user.sessionToken = genToken();
-    user.status = "active"; // Ensure active
+    user.status = "active";
     saveDB(db);
     return safeJson(res, { success: true, token: user.sessionToken });
   }
@@ -116,8 +117,19 @@ app.post("/check-requests", (req, res) => {
   const { username } = req.body;
   const db = loadDB();
   const user = db.users[username];
-  if (user && user.status === "pending") {
-    return safeJson(res, { hasRequest: true, requestId: user.requestId });
+  
+  if (user) {
+    // HEARTBEAT: Update lastActive timestamp
+    // We update only if > 10 seconds to avoid excessive disk writes
+    const now = Date.now();
+    if (now - user.lastActive > 10000) {
+        user.lastActive = now;
+        saveDB(db);
+    }
+
+    if (user.status === "pending") {
+      return safeJson(res, { hasRequest: true, requestId: user.requestId });
+    }
   }
   return safeJson(res, { hasRequest: false });
 });
@@ -134,28 +146,24 @@ app.post("/approve", (req, res) => {
     user.waitingDevice = null;
     user.requestId = null;
     user.declineMessage = null;
+    user.lastActive = Date.now();
     saveDB(db);
     return safeJson(res, { success: true });
   }
   return safeJson(res, { success: false });
 });
 
-// === UPDATED DECLINE ENDPOINT ===
 app.post("/decline", (req, res) => {
   const { username } = req.body;
   const db = loadDB();
   const user = db.users[username];
 
   if (user) {
-    // Set the specific message
     user.declineMessage = "Sorry! Account owner not approve, សុំទោស!ម្ចាស់ដើមមិនអនុញ្ញាតទេ។ សូមអរគុណ";
-    
-    // Reset status so owner remains owner
     user.status = "active";
-    // Clear the waiting data
     user.waitingDevice = null;
     user.requestId = null;
-    
+    user.lastActive = Date.now();
     saveDB(db);
     return safeJson(res, { success: true });
   }
@@ -168,8 +176,11 @@ app.post("/logout", (req, res) => {
   for (const k in db.users) {
     if (db.users[k].sessionToken === token) {
       db.users[k].sessionToken = null;
-      // We keep deviceId so they are still the "Owner", just logged out.
-      // If you want to fully reset ownership, set deviceId = null here.
+      
+      // === CHANGE: Clear deviceId on Logout ===
+      // This allows ANY device to login next time without permission
+      db.users[k].deviceId = null; 
+      
       db.users[k].status = "logged_out";
       saveDB(db);
       return safeJson(res, { success: true });
@@ -177,6 +188,41 @@ app.post("/logout", (req, res) => {
   }
   return safeJson(res, { success: false });
 });
+
+// === AUTO LOGOUT INTERVAL (30 Minutes Offline) ===
+const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes
+setInterval(() => {
+  try {
+    const db = loadDB();
+    const now = Date.now();
+    let changed = false;
+
+    for (const k in db.users) {
+      const user = db.users[k];
+      
+      // If user is considered "active" (has a deviceId)
+      if (user.deviceId && user.lastActive) {
+        // Check if offline for > 30 mins
+        if (now - user.lastActive > INACTIVITY_LIMIT) {
+            console.log(`[Auto-Logout] User ${k} inactive for > 30mins. Resetting.`);
+            
+            // Reset user to allow new logins
+            user.deviceId = null;
+            user.sessionToken = null;
+            user.status = "logged_out";
+            user.waitingDevice = null;
+            user.requestId = null;
+            
+            changed = true;
+        }
+      }
+    }
+
+    if (changed) saveDB(db);
+  } catch (err) {
+    console.error("Auto-logout interval error:", err);
+  }
+}, 60 * 1000); // Check every 1 minute
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

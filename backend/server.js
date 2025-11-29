@@ -30,7 +30,8 @@ const USERS = [
   { username: "Vutha", password: "vutha@2055" },
   { username: "Simtap", password: "simtap@2025" },
   { username: "Chanlim", password: "chanlim@2025" },
-  { username: "Raksa", password: "raksa@2025" }
+  { username: "Raksa", password: "raksa@2025" },
+  { username: "Sopheas", password: "sopheas@9999" }
 ];
 
 // Init Users

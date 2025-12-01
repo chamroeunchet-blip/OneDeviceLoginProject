@@ -32,7 +32,33 @@ const USERS = [
   { username: "Chanlim", password: "chanlim@2025" },
   { username: "Raksa", password: "raksa@2025" },
   { username: "Sopheas", password: "sopheas@9999" },
-  { username: "Saovanny", password: "vanny@99" }
+  { username: "Saovanny", password: "vanny@99" },
+  { username: "Soksangha", password: "@sangha9999" },
+  { username: "Seanghai", password: "@seanghai99" },
+  { username: "Virak", password: "@virak9999" },
+  { username: "Seyha", password: "@seyha999" },
+  { username: "Sichan", password: "@sichan99" },
+  { username: "Davy", password: "davy@9999" },
+  { username: "Sreysros", password: "sreysros@99" },
+  { username: "Chetra", password: "chetra@999" },
+  { username: "Bunnavath", password: "bunavath@9999" },
+  { username: "Davin", password: "davin#2025" },
+  { username: "Sochar", password: "sochar@99" },
+  { username: "Roza", password: "roza@9999" },
+   { username: "Penglong", password: "long@99" },
+  { username: "Kimhong", password: "kimhong@2025" },
+  { username: "Kamsan", password: "kamsan@2025" },
+  { username: "Meng_y", password: "megmy@2025" },
+  { username: "Senghuor", password: "chetra@999" },
+  { username: "Sipathnarath", password: "bunavath@9999" },
+  { username: "Rathana", password: "rathana@2025" },
+  { username: "Sochar", password: "sochar@99" },
+  { username: "Leangmey", password: "roza@9999" },
+  { username: "Somnang", password: "somnang@99" },
+  { username: "Chamroeun", password: "chomroeun03/11/1993" },
+  { username: "Mengleang", password: "mengleang@168" },
+  { username: "Chamnab", password: "chamnab@168" }
+  
 ];
 
 // Init Users

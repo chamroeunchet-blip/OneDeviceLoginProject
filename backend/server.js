@@ -35,6 +35,7 @@ const USERS = [
   { username: "Saovanny", password: "vanny@99" },
   { username: "Soksangha", password: "@sangha9999" },
   { username: "Seanghai", password: "@seanghai99" },
+  { username: "Saksophea", password: "sophea@2025" },
   { username: "Virak", password: "@virak9999" },
   { username: "Seyha", password: "@seyha999" },
   { username: "Sichan", password: "@sichan99" },

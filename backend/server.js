@@ -22,69 +22,71 @@ function saveDB(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// === Users Config ===
+// === USERS CONFIG ===
+// Add startDate & durationDays manually for each user
 const USERS = [
- { username: "Yuos_chamroeun", password: "chamroeun@2025" },
-  { username: "Soma", password: "soma@2025" },
-  { username: "Sokthida", password: "sokthida@2025" },
-  { username: "Vutha", password: "vutha@2055" },
-  { username: "Simtap", password: "simtap@2025" },
-  { username: "Chanlim", password: "chanlim@2025" },
-  { username: "Raksa", password: "raksa@2025" },
-  { username: "Sopheas", password: "sopheas@9999" },
-  { username: "Saovanny", password: "vanny@99" },
-  { username: "Soksangha", password: "@sangha9999" },
-  { username: "Seanghai", password: "@seanghai99" },
-  { username: "Saksophea", password: "sophea@2025" },
-  { username: "Virak", password: "@virak9999" },
-  { username: "Seyha", password: "@seyha999" },
-  { username: "Sichan", password: "@sichan99" },
-  { username: "Davy", password: "davy@9999" },
-  { username: "Sreysros", password: "sreysros@99" },
-  { username: "Chetra", password: "chetra@999" },
-  { username: "Bunnavath", password: "bunavath@9999" },
-  { username: "Davin", password: "davin#2025" },
-  { username: "Sochar", password: "sochar@99" },
-  { username: "Roza", password: "roza@9999" },
-   { username: "Penglong", password: "long@99" },
-  { username: "Kimhong", password: "kimhong@2025" },
-  { username: "Kamsan", password: "kamsan@2025" },
-  { username: "Meng_y", password: "mengy@2025" },
-  { username: "Senghuor", password: "huor@9999" },
-  { username: "Sipathnarath", password: "naroth@9999" },
-  { username: "Rathana", password: "rathana@2025" },
-  { username: "Sochar", password: "sochar@99" },
-  { username: "Leangmey", password: "leangmey@99" },
-  { username: "Somnang", password: "somnang@99" },
-  { username: "Chamroeun", password: "chomroeun03/11/1993" },
-  { username: "Mengleang", password: "meng168leang" },
-  { username: "Chamnab", password: "chamnab@168" },
-  { username: "Chandara", password: "dara@2025" },
-  { username: "Kimleng", password: "kimleng@2025" },
-  { username: "Lyheang", password: "lyheang@2025" },
-
-   { username: "Sovan", password: "sovan@2025" },
-  { username: "Seavmey", password: "seavmey@2025" },
-  { username: "Sokhethida", password: "thida@2025" },
-  { username: "Sokla", password: "sokla@2025" },
-  { username: "Vita", password: "vita@2025" },
-  { username: "Silin", password: "silin@2025" },
-  { username: "Soriya", password: "soriya@9999" },
-  { username: "Chamnab", password: "chamnab@2025" },
-  { username: "Virak", password: "virak@2025" },
-  { username: "Chanvirak", password: "virak@2025" },
-  { username: "Reth Sam Oun", password: "samoun@2025" },
-  { username: "Serysophea", password: "sophea@2025" },
-  { username: "Soheng", password: "soheng@2025" },
-  { username: "Chenda", password: "chenda@9999" },
-  { username: "Siphathnaroth", password: "naroth@9999" },
-  { username: "Senghuor", password: "senghuor@2025" }
+  { username: "Yuos_chamroeun", password: "chamroeun@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Soma", password: "soma@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sokthida", password: "sokthida@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Vutha", password: "vutha@2055", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Simtap", password: "simtap@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chanlim", password: "chanlim@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Raksa", password: "raksa@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sopheas", password: "sopheas@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Saovanny", password: "vanny@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Soksangha", password: "@sangha9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Seanghai", password: "@seanghai99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Saksophea", password: "sophea@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Virak", password: "@virak9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Seyha", password: "@seyha999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sichan", password: "@sichan99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Davy", password: "davy@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sreysros", password: "sreysros@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chetra", password: "chetra@999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Bunnavath", password: "bunavath@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Davin", password: "davin#2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sochar", password: "sochar@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Roza", password: "roza@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Penglong", password: "long@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Kimhong", password: "kimhong@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Kamsan", password: "kamsan@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Meng_y", password: "mengy@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Senghuor", password: "huor@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sipathnarath", password: "naroth@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Rathana", password: "rathana@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sochar", password: "sochar@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Leangmey", password: "leangmey@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Somnang", password: "somnang@99", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chamroeun", password: "chomroeun03/11/1993", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Mengleang", password: "meng168leang", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chamnab", password: "chamnab@168", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chandara", password: "dara@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Kimleng", password: "kimleng@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Lyheang", password: "lyheang@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sovan", password: "sovan@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Seavmey", password: "seavmey@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sokhethida", password: "thida@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sokla", password: "sokla@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Vita", password: "vita@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Silin", password: "silin@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Soriya", password: "soriya@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chamnab", password: "chamnab@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Virak", password: "virak@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chanvirak", password: "virak@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Reth Sam Oun", password: "samoun@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Serysophea", password: "sophea@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Soheng", password: "soheng@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Chenda", password: "chenda@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Siphathnaroth", password: "naroth@9999", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Senghuor", password: "senghuor@2025", startDate: "2025-11-11", durationDays: 365 }
+  // ... Add for all users
 ];
 
-// Init Users
+// === Initialize Users ===
 (function initUsers() {
   const db = loadDB();
   if (!db.users) db.users = {};
+
   USERS.forEach(u => {
     if (!db.users[u.username]) {
       db.users[u.username] = {
@@ -95,68 +97,100 @@ const USERS = [
         waitingDevice: null,
         requestId: null,
         declineMessage: null,
-        lastActive: 0 // Added to track inactivity
+        lastActive: 0,
+
+        // NEW
+        startDate: u.startDate || null,
+        durationDays: u.durationDays || 365
       };
     } else {
-        // Ensure password is up to date if changed in config
-        db.users[u.username].password = u.password;
-        // Ensure lastActive exists
-        if (!db.users[u.username].lastActive) db.users[u.username].lastActive = 0;
+      db.users[u.username].password = u.password;
+
+      if (!db.users[u.username].startDate)
+        db.users[u.username].startDate = u.startDate || null;
+
+      if (!db.users[u.username].durationDays)
+        db.users[u.username].durationDays = u.durationDays || 365;
     }
   });
+
   saveDB(db);
 })();
 
 function genToken() { return crypto.randomUUID(); }
-function safeJson(res, obj) { res.json(obj); }
 
-// === ROUTES ===
+// === EXPIRATION HANDLER ===
+function isExpired(user) {
+  if (!user.startDate) return false;
 
+  const start = new Date(user.startDate).getTime();
+  const expire = start + user.durationDays * 24 * 60 * 60 * 1000;
+
+  return Date.now() >= expire;
+}
+
+function expireTimestamp(user) {
+  if (!user.startDate) return null;
+  const start = new Date(user.startDate).getTime();
+  return start + user.durationDays * 24 * 60 * 60 * 1000;
+}
+
+// === LOGIN ROUTE ===
 app.post("/login", (req, res) => {
   const { username, password, deviceId } = req.body || {};
-  if (!username || !password || !deviceId) return safeJson(res, { success: false, message: "Missing inputs" });
+  if (!username || !password || !deviceId)
+    return res.json({ success: false, message: "Missing inputs" });
 
   const db = loadDB();
   const user = db.users[username];
-  
-  if (!user) return safeJson(res, { success: false, message: "Invalid username" });
-  if (user.password !== password) return safeJson(res, { success: false, message: "Wrong password" });
+
+  if (!user) return res.json({ success: false, message: "Invalid username" });
+  if (user.password !== password) return res.json({ success: false, message: "Wrong password" });
+
+  // CHECK EXPIRATION
+  if (isExpired(user)) {
+    return res.json({
+      success: false,
+      expired: true,
+      expireAt: expireTimestamp(user),
+      message: "Account expired. Please contact admin."
+    });
+  }
 
   // CHECK DECLINE
   if (user.declineMessage) {
-      const msg = user.declineMessage;
-      user.declineMessage = null; 
-      saveDB(db);
-      return safeJson(res, { success: false, isDeclined: true, message: msg });
+    const msg = user.declineMessage;
+    user.declineMessage = null;
+    saveDB(db);
+    return res.json({ success: false, isDeclined: true, message: msg });
   }
 
-  // Update Activity on Login
   user.lastActive = Date.now();
 
-  // 1. First time login OR deviceId was cleared (Logout)
+  // FIRST LOGIN
   if (!user.deviceId) {
     user.deviceId = deviceId;
     user.sessionToken = genToken();
     user.status = "active";
     saveDB(db);
-    return safeJson(res, { success: true, token: user.sessionToken });
+    return res.json({ success: true, token: user.sessionToken, expireAt: expireTimestamp(user) });
   }
 
-  // 2. Same device login
+  // SAME DEVICE LOGIN
   if (user.deviceId === deviceId) {
     if (!user.sessionToken) user.sessionToken = genToken();
     user.status = "active";
     saveDB(db);
-    return safeJson(res, { success: true, token: user.sessionToken });
+    return res.json({ success: true, token: user.sessionToken, expireAt: expireTimestamp(user) });
   }
 
-  // 3. Different device -> create request
+  // SECOND DEVICE LOGIN → REQUEST APPROVAL
   user.status = "pending";
   user.waitingDevice = deviceId;
   user.requestId = genToken();
   saveDB(db);
 
-  return safeJson(res, {
+  return res.json({
     success: false,
     requiresApproval: true,
     requestId: user.requestId,
@@ -164,116 +198,111 @@ app.post("/login", (req, res) => {
   });
 });
 
+// === CHECK REQUESTS ===
 app.post("/check-requests", (req, res) => {
   const { username } = req.body;
+
   const db = loadDB();
   const user = db.users[username];
-  
+
   if (user) {
-    // HEARTBEAT: Update lastActive timestamp
-    // We update only if > 10 seconds to avoid excessive disk writes
     const now = Date.now();
     if (now - user.lastActive > 10000) {
-        user.lastActive = now;
-        saveDB(db);
+      user.lastActive = now;
+      saveDB(db);
     }
 
     if (user.status === "pending") {
-      return safeJson(res, { hasRequest: true, requestId: user.requestId });
+      return res.json({ hasRequest: true, requestId: user.requestId });
     }
   }
-  return safeJson(res, { hasRequest: false });
+
+  return res.json({ hasRequest: false });
 });
 
+// === APPROVE ===
 app.post("/approve", (req, res) => {
   const { username, requestId } = req.body;
+
   const db = loadDB();
   const user = db.users[username];
-  
+
   if (user && user.requestId === requestId) {
     user.deviceId = user.waitingDevice;
     user.sessionToken = genToken();
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;
-    user.declineMessage = null;
-    user.lastActive = Date.now();
     saveDB(db);
-    return safeJson(res, { success: true });
+    return res.json({ success: true });
   }
-  return safeJson(res, { success: false });
+
+  return res.json({ success: false });
 });
 
+// === DECLINE ===
 app.post("/decline", (req, res) => {
   const { username } = req.body;
+
   const db = loadDB();
   const user = db.users[username];
 
-  if (user) {
-    user.declineMessage = "Sorry! Account owner not approve, សុំទោស!ម្ចាស់ដើមមិនអនុញ្ញាតទេ។ សូមអរគុណ";
-    user.status = "active";
-    user.waitingDevice = null;
-    user.requestId = null;
-    user.lastActive = Date.now();
-    saveDB(db);
-    return safeJson(res, { success: true });
-  }
-  return safeJson(res, { success: false });
+  user.declineMessage =
+    "Sorry! Account owner did not approve. សូមទោស! ម្ចាស់គណនីមិនអនុញ្ញាតទេ។";
+
+  user.status = "active";
+  user.waitingDevice = null;
+  user.requestId = null;
+
+  saveDB(db);
+  return res.json({ success: true });
 });
 
+// === LOGOUT ===
 app.post("/logout", (req, res) => {
   const { token } = req.body;
+
   const db = loadDB();
+
   for (const k in db.users) {
-    if (db.users[k].sessionToken === token) {
-      db.users[k].sessionToken = null;
-      
-      // === CHANGE: Clear deviceId on Logout ===
-      // This allows ANY device to login next time without permission
-      db.users[k].deviceId = null; 
-      
-      db.users[k].status = "logged_out";
+    const u = db.users[k];
+
+    if (u.sessionToken === token) {
+      u.sessionToken = null;
+      u.deviceId = null;
+      u.status = "logged_out";
+
       saveDB(db);
-      return safeJson(res, { success: true });
+      return res.json({ success: true });
     }
   }
-  return safeJson(res, { success: false });
+
+  res.json({ success: false });
 });
 
-// === AUTO LOGOUT INTERVAL (30 Minutes Offline) ===
-const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes
+// === AUTO LOGOUT (30min inactive) ===
 setInterval(() => {
-  try {
-    const db = loadDB();
-    const now = Date.now();
-    let changed = false;
+  const db = loadDB();
+  const now = Date.now();
 
-    for (const k in db.users) {
-      const user = db.users[k];
-      
-      // If user is considered "active" (has a deviceId)
-      if (user.deviceId && user.lastActive) {
-        // Check if offline for > 30 mins
-        if (now - user.lastActive > INACTIVITY_LIMIT) {
-            console.log(`[Auto-Logout] User ${k} inactive for > 30mins. Resetting.`);
-            
-            // Reset user to allow new logins
-            user.deviceId = null;
-            user.sessionToken = null;
-            user.status = "logged_out";
-            user.waitingDevice = null;
-            user.requestId = null;
-            
-            changed = true;
-        }
-      }
+  let updateNeeded = false;
+
+  for (const k in db.users) {
+    const u = db.users[k];
+
+    if (u.deviceId && u.lastActive && now - u.lastActive > 30 * 60 * 1000) {
+      u.deviceId = null;
+      u.sessionToken = null;
+      u.status = "logged_out";
+      u.waitingDevice = null;
+      u.requestId = null;
+
+      updateNeeded = true;
     }
-
-    if (changed) saveDB(db);
-  } catch (err) {
-    console.error("Auto-logout interval error:", err);
   }
-}, 60 * 1000); // Check every 1 minute
+
+  if (updateNeeded) saveDB(db);
+}, 60000);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log("Backend running on port " + PORT));

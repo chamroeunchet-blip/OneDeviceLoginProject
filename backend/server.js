@@ -78,7 +78,21 @@ const USERS = [
   { username: "Soheng", password: "soheng@2025", startDate: "2025-11-11", durationDays: 365 },
   { username: "Chenda", password: "chenda@9999", startDate: "2025-11-11", durationDays: 365 },
   { username: "Siphathnaroth", password: "naroth@9999", startDate: "2025-11-11", durationDays: 365 },
-  { username: "Senghuor", password: "senghuor@2025", startDate: "2025-11-11", durationDays: 365 }
+  { username: "Senghuor", password: "senghuor@2025", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Sovan", password: "van@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Thearoth", password: "roth@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Chungkhoang", password: "Khoang@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Pheaktra", password: "tra@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Sotheavath", password: "vath@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Sothynorom", password: "rom@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Ponareay", password: "nareay@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Dalin", password: "dalin@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Lina", password: "na@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Savuth", password: "savuth@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Makara", password: "makara@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Seavmey", password: "mey@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Oudom", password: "dom@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Sopheak", password: "pheak@151225", startDate: "2025-11-15", durationDays: 365 }
   // ... Add for all users
 ];
 

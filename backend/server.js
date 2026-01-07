@@ -109,8 +109,14 @@ const USERS = [
   { username: "kimbunthav", password: "thav@171225", startDate: "2025-11-16", durationDays: 365 },
   { username: "Sokla", password: "sokla@2025", startDate: "2025-11-16", durationDays: 1200 },
   { username: "Linda", password: "linda@2026", startDate: "2025-11-16", durationDays: 1200 },
-  { username: "Sovan", password: "sovan@2025", startDate: "2025-11-16", durationDays: 1200 }
-// ... Add for all users
+  { username: "Sovan", password: "sovan@2025", startDate: "2025-11-16", durationDays: 1200 },
+  
+  //------laboratory accounts-----
+   { username: "Test", password: "test@2026", startDate: "2026-01-08", durationDays: 3 }
+
+
+  
+  // ... Add for all users
 ];
 
 // === Initialize Users ===

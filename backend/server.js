@@ -23,7 +23,6 @@ function saveDB(data) {
 }
 
 // === USERS CONFIG ===
-// Add startDate & durationDays manually for each user
 const USERS = [
   { username: "Yuos_chamroeun", password: "chamroeun@2025", startDate: "2025-11-11", durationDays: 1200 },
   { username: "Soma", password: "soma@2025", startDate: "2025-11-11", durationDays: 1200 },
@@ -93,7 +92,7 @@ const USERS = [
   { username: "Oudom", password: "dom@151225", startDate: "2025-11-15", durationDays: 365 },
   { username: "Sopheak", password: "pheak@151225", startDate: "2025-11-15", durationDays: 365 },
   { username: "Ponleu", password: "ponleu@168", startDate: "2025-11-16", durationDays: 1000 },
-    { username: "Boline", password: "boline@151225", startDate: "2025-11-15", durationDays: 365 },
+  { username: "Boline", password: "boline@151225", startDate: "2025-11-15", durationDays: 365 },
   { username: "Rangsey", password: "sey@151225", startDate: "2025-11-15", durationDays: 365 },
   { username: "Sovannarath", password: "rath@151225", startDate: "2025-11-15", durationDays: 365 },
   { username: "Channak", password: "nak@151225", startDate: "2025-11-15", durationDays: 365 },
@@ -110,20 +109,16 @@ const USERS = [
   { username: "Sokla", password: "sokla@2025", startDate: "2025-11-16", durationDays: 1200 },
   { username: "Linda", password: "linda@2026", startDate: "2025-11-16", durationDays: 1200 },
   { username: "Sovan", password: "sovan@2025", startDate: "2025-11-16", durationDays: 1200 },
-   { username: "Longpheng", password: "pheng@2026", startDate: "2026-1-10", durationDays: 1 },
-   { username: "Thavongvuth", password: "vuth@168", startDate: "2026-1-10", durationDays: 366 },
+  { username: "Longpheng", password: "pheng@2026", startDate: "2026-1-10", durationDays: 1 },
+  { username: "Thavongvuth", password: "vuth@168", startDate: "2026-1-10", durationDays: 366 },
   { username: "Pichbondith", password: "bondith@168", startDate: "2026-1-14", durationDays: 366 },
-   { username: "Samart", password: "art@168", startDate: "2026-1-14", durationDays: 366 },
+  { username: "Samart", password: "art@168", startDate: "2026-1-14", durationDays: 366 },
   { username: "Kimsor", password: "kimsor@1280", startDate: "2026-1-14", durationDays: 365 },
-    { username: "Kamsan2", password: "san@002", startDate: "2026-1-14", durationDays: 366 },
-   { username: "Chheang", password: "Chheang7272", startDate: "2026-1-28", durationDays: 366 },
+  { username: "Kamsan2", password: "san@002", startDate: "2026-1-14", durationDays: 366 },
+  { username: "Chheang", password: "Chheang7272", startDate: "2026-1-28", durationDays: 366 },
   //------laboratory accounts-----
-   { username: "Test", password: "test@2026", startDate: "2026-01-08", durationDays: 30 },
+  { username: "Test", password: "test@2026", startDate: "2026-01-08", durationDays: 30 },
   { username: "Test02", password: "test@2026", startDate: "2026-01-08", durationDays: 30 }
-
-
-  
-  // ... Add for all users
 ];
 
 // === Initialize Users ===
@@ -142,19 +137,17 @@ const USERS = [
         requestId: null,
         declineMessage: null,
         lastActive: 0,
-
-        // NEW
         startDate: u.startDate || null,
-        durationDays: u.durationDays || 365
+        durationDays: u.durationDays || 365,
+        // NEW: lastUrl field
+        lastUrl: null 
       };
     } else {
       db.users[u.username].password = u.password;
-
-      if (!db.users[u.username].startDate)
-        db.users[u.username].startDate = u.startDate || null;
-
-      if (!db.users[u.username].durationDays)
-        db.users[u.username].durationDays = u.durationDays || 365;
+      if (!db.users[u.username].startDate) db.users[u.username].startDate = u.startDate || null;
+      if (!db.users[u.username].durationDays) db.users[u.username].durationDays = u.durationDays || 365;
+      // Ensure lastUrl exists
+      if (db.users[u.username].lastUrl === undefined) db.users[u.username].lastUrl = null;
     }
   });
 
@@ -166,10 +159,8 @@ function genToken() { return crypto.randomUUID(); }
 // === EXPIRATION HANDLER ===
 function isExpired(user) {
   if (!user.startDate) return false;
-
   const start = new Date(user.startDate).getTime();
   const expire = start + user.durationDays * 24 * 60 * 60 * 1000;
-
   return Date.now() >= expire;
 }
 
@@ -217,7 +208,12 @@ app.post("/login", (req, res) => {
     user.sessionToken = genToken();
     user.status = "active";
     saveDB(db);
-    return res.json({ success: true, token: user.sessionToken, expireAt: expireTimestamp(user) });
+    return res.json({ 
+      success: true, 
+      token: user.sessionToken, 
+      expireAt: expireTimestamp(user),
+      lastUrl: user.lastUrl // Send saved URL
+    });
   }
 
   // SAME DEVICE LOGIN
@@ -225,7 +221,12 @@ app.post("/login", (req, res) => {
     if (!user.sessionToken) user.sessionToken = genToken();
     user.status = "active";
     saveDB(db);
-    return res.json({ success: true, token: user.sessionToken, expireAt: expireTimestamp(user) });
+    return res.json({ 
+      success: true, 
+      token: user.sessionToken, 
+      expireAt: expireTimestamp(user),
+      lastUrl: user.lastUrl // Send saved URL
+    });
   }
 
   // SECOND DEVICE LOGIN → REQUEST APPROVAL
@@ -242,6 +243,24 @@ app.post("/login", (req, res) => {
   });
 });
 
+// === NEW ROUTE: UPDATE PROGRESS ===
+app.post("/update-progress", (req, res) => {
+  const { username, token, url } = req.body;
+  if (!username || !token || !url) return res.json({ success: false });
+
+  const db = loadDB();
+  const user = db.users[username];
+
+  // Security check: Match token
+  if (user && user.sessionToken === token) {
+    user.lastUrl = url;
+    user.lastActive = Date.now(); // Also update activity
+    saveDB(db);
+    return res.json({ success: true });
+  }
+  return res.json({ success: false });
+});
+
 // === CHECK REQUESTS ===
 app.post("/check-requests", (req, res) => {
   const { username } = req.body;
@@ -251,6 +270,7 @@ app.post("/check-requests", (req, res) => {
 
   if (user) {
     const now = Date.now();
+    // Only update lastActive if recent activity
     if (now - user.lastActive > 10000) {
       user.lastActive = now;
       saveDB(db);
@@ -315,7 +335,7 @@ app.post("/logout", (req, res) => {
       u.sessionToken = null;
       u.deviceId = null;
       u.status = "logged_out";
-
+      // We do NOT clear lastUrl on logout, so they can resume later
       saveDB(db);
       return res.json({ success: true });
     }

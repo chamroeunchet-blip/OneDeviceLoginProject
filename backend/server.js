@@ -27,7 +27,7 @@ const USERS = [
   { username: "Yuos_chamroeun", password: "chamroeun@2025", startDate: "2025-11-11", durationDays: 1200 },
   { username: "Soma", password: "soma@2025", startDate: "2025-11-11", durationDays: 1200 },
   { username: "Sokthida", password: "sokthida@2025", startDate: "2025-11-11", durationDays: 365 },
-  { username: "Vutha", password: "vutha@168", startDate: "2025-11-11", durationDays: 365 },
+  { username: "Vutha", password: "vutha@1280", startDate: "2025-11-11", durationDays: 365 },
   { username: "Simtap", password: "simtap@2025", startDate: "2025-11-11", durationDays: 365 },
   { username: "Chanlim", password: "chanlim@2025", startDate: "2025-11-11", durationDays: 1200 },
   { username: "Raksa", password: "raksa@2025", startDate: "2025-11-11", durationDays: 1200 },
@@ -120,6 +120,7 @@ const USERS = [
   { username: "Sokchan", password: "chan@168", startDate: "2026-2-3", durationDays: 366 },
    { username: "Puthea", password: "puthea@168", startDate: "2026-2-3", durationDays: 200},
    { username: "Vandy", password: "vandy@1280", startDate: "2026-2-3", durationDays: 168},
+  
   //------laboratory accounts-----
   { username: "Test", password: "test@2026", startDate: "2026-01-08", durationDays: 30 },
   { username: "Test02", password: "test@2026", startDate: "2026-01-08", durationDays: 30 }

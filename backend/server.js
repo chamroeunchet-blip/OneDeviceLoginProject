@@ -131,6 +131,8 @@ const USERS = [
   { username: "Chuncheu", password: "cheu@9999", startDate: "2026-2-22", durationDays: 1300},
   { username: "SeangE1", password: "E@9999", startDate: "2026-2-22", durationDays: 366},
   { username: "SeangE2", password: "E@9999", startDate: "2026-2-22", durationDays: 366},
+   { username: "VONG123", password: "vong123", startDate: "2026-2-22", durationDays: 366},
+   { username: "Vann_Sotheara", password: "Sotheara16", startDate: "2026-2-22", durationDays: 366},
   
 
   

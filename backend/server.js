@@ -266,7 +266,7 @@ app.post("/login", (req, res) => {
   });
 });
 
-// === NEW ROUTE: UPDATE PROGRESS ===
+// === UPDATE PROGRESS ===
 app.post("/update-progress", (req, res) => {
   const { username, token, url } = req.body;
   if (!username || !token || !url) return res.json({ success: false });
@@ -281,17 +281,24 @@ app.post("/update-progress", (req, res) => {
     saveDB(db);
     return res.json({ success: true });
   }
-  return res.json({ success: false });
+  
+  // បើ Token ខុស (មានអ្នក Login ចូល Device ផ្សេង) បញ្ជាឲ្យ Logout ភ្លាមៗ
+  return res.json({ success: false, forceLogout: true, message: "Invalid token" });
 });
 
 // === CHECK REQUESTS ===
 app.post("/check-requests", (req, res) => {
-  const { username } = req.body;
+  const { username, token } = req.body;
 
   const db = loadDB();
   const user = db.users[username];
 
   if (user) {
+    // ត្រួតពិនិត្យ Token បើខុសបញ្ជាឲ្យ Logout ភ្លាមៗ មិនឲ្យ Update lastActive ទេ
+    if (user.sessionToken && user.sessionToken !== token) {
+      return res.json({ success: false, forceLogout: true, message: "Invalid token" });
+    }
+
     const now = Date.now();
     // Only update lastActive if recent activity
     if (now - user.lastActive > 10000) {
@@ -316,7 +323,7 @@ app.post("/approve", (req, res) => {
 
   if (user && user.requestId === requestId) {
     user.deviceId = user.waitingDevice;
-    user.sessionToken = genToken();
+    user.sessionToken = genToken(); // បង្កើត Token ថ្មី (ពេលនេះ Device ចាស់នឹងត្រូវទាត់ចេញព្រោះ Token ខុសគ្នា)
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;

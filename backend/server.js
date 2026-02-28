@@ -10,6 +10,30 @@ app.use(express.json());
 
 const DATA_FILE = path.join(__dirname, "device.json");
 
+// === Helper: ចាប់យកប្រភេទ Device និង Browser ===
+function parseUserAgent(ua) {
+  if (!ua) return { browser: "Unknown", os: "Unknown" };
+  let browser = "Unknown";
+  let os = "Unknown";
+
+  if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("SamsungBrowser")) browser = "Samsung Browser";
+  else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+  else if (ua.includes("Trident") || ua.includes("MSIE")) browser = "Internet Explorer";
+  else if (ua.includes("Edge") || ua.includes("Edg")) browser = "Edge";
+  else if (ua.includes("Chrome")) browser = "Chrome";
+  else if (ua.includes("Safari")) browser = "Safari";
+
+  if (ua.includes("Win")) os = "Windows";
+  else if (ua.includes("Mac")) os = "MacOS";
+  else if (ua.includes("X11")) os = "UNIX";
+  else if (ua.includes("Linux")) os = "Linux";
+  if (ua.includes("Android")) os = "Android";
+  if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+
+  return { browser, os };
+}
+
 // === Database Helper ===
 function loadDB() {
   if (!fs.existsSync(DATA_FILE)) {
@@ -162,8 +186,10 @@ const USERS = [
         lastActive: 0,
         startDate: u.startDate || null,
         durationDays: u.durationDays || 365,
-        // NEW: lastUrl field
-        lastUrl: null 
+        lastUrl: null,
+        // NEW: ផ្ទុកព័ត៌មានឧបករណ៍
+        deviceInfo: null,
+        pendingDeviceInfo: null
       };
     } else {
       db.users[u.username].password = u.password;
@@ -223,12 +249,19 @@ app.post("/login", (req, res) => {
     return res.json({ success: false, isDeclined: true, message: msg });
   }
 
+  // ចាប់យក IP, Browser និង OS
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || "Unknown IP";
+  const ua = req.headers['user-agent'];
+  const { browser, os } = parseUserAgent(ua);
+  const currentDeviceInfo = { ip, browser, os };
+
   user.lastActive = Date.now();
 
   // FIRST LOGIN
   if (!user.deviceId) {
     user.deviceId = deviceId;
     user.sessionToken = genToken();
+    user.deviceInfo = currentDeviceInfo; // រក្សាទុកព័ត៌មានឧបករណ៍
     user.status = "active";
     saveDB(db);
     return res.json({ 
@@ -242,6 +275,7 @@ app.post("/login", (req, res) => {
   // SAME DEVICE LOGIN
   if (user.deviceId === deviceId) {
     if (!user.sessionToken) user.sessionToken = genToken();
+    user.deviceInfo = currentDeviceInfo; // Update ព័ត៌មានឧបករណ៍
     user.status = "active";
     saveDB(db);
     return res.json({ 
@@ -256,6 +290,7 @@ app.post("/login", (req, res) => {
   user.status = "pending";
   user.waitingDevice = deviceId;
   user.requestId = genToken();
+  user.pendingDeviceInfo = currentDeviceInfo; // ផ្ទុកព័ត៌មានអ្នកដែលព្យាយាមចូលថ្មី
   saveDB(db);
 
   return res.json({
@@ -266,7 +301,7 @@ app.post("/login", (req, res) => {
   });
 });
 
-// === NEW ROUTE: UPDATE PROGRESS ===
+// === UPDATE PROGRESS ===
 app.post("/update-progress", (req, res) => {
   const { username, token, url } = req.body;
   if (!username || !token || !url) return res.json({ success: false });
@@ -281,17 +316,24 @@ app.post("/update-progress", (req, res) => {
     saveDB(db);
     return res.json({ success: true });
   }
-  return res.json({ success: false });
+  
+  // បើ Token ខុស (មានអ្នក Login ចូល Device ផ្សេង) បញ្ជាឲ្យ Logout ភ្លាមៗ
+  return res.json({ success: false, forceLogout: true, message: "Invalid token" });
 });
 
 // === CHECK REQUESTS ===
 app.post("/check-requests", (req, res) => {
-  const { username } = req.body;
+  const { username, token } = req.body;
 
   const db = loadDB();
   const user = db.users[username];
 
   if (user) {
+    // ត្រួតពិនិត្យ Token បើខុសបញ្ជាឲ្យ Logout ភ្លាមៗ មិនឲ្យ Update lastActive ទេ
+    if (user.sessionToken && user.sessionToken !== token) {
+      return res.json({ success: false, forceLogout: true, message: "Invalid token" });
+    }
+
     const now = Date.now();
     // Only update lastActive if recent activity
     if (now - user.lastActive > 10000) {
@@ -300,7 +342,8 @@ app.post("/check-requests", (req, res) => {
     }
 
     if (user.status === "pending") {
-      return res.json({ hasRequest: true, requestId: user.requestId });
+      // បញ្ជូនព័ត៌មានឧបករណ៍ថ្មីទៅឲ្យ Device ចាស់បានដឹង
+      return res.json({ hasRequest: true, requestId: user.requestId, deviceInfo: user.pendingDeviceInfo });
     }
   }
 
@@ -316,10 +359,12 @@ app.post("/approve", (req, res) => {
 
   if (user && user.requestId === requestId) {
     user.deviceId = user.waitingDevice;
-    user.sessionToken = genToken();
+    user.sessionToken = genToken(); // បង្កើត Token ថ្មី (ពេលនេះ Device ចាស់នឹងត្រូវទាត់ចេញព្រោះ Token ខុសគ្នា)
+    user.deviceInfo = user.pendingDeviceInfo; // ប្តូរទៅប្រើ Device ថ្មីជាផ្លូវការ
     user.status = "active";
     user.waitingDevice = null;
     user.requestId = null;
+    user.pendingDeviceInfo = null;
     saveDB(db);
     return res.json({ success: true });
   }
@@ -340,6 +385,7 @@ app.post("/decline", (req, res) => {
   user.status = "active";
   user.waitingDevice = null;
   user.requestId = null;
+  user.pendingDeviceInfo = null;
 
   saveDB(db);
   return res.json({ success: true });
